@@ -1,6 +1,6 @@
 # KeepRsyncing
 
-Used for uploading large files on an unstable connection and slow. Files will be deleted from sending computer once transfered.
+Used for uploading large files on an unstable  and slow connection. Files will be deleted from sending computer once transfered.
 
 ----
 
