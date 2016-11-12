@@ -113,15 +113,29 @@ function Arguments(){
 		esac
 	shift # past argument or value
 	done
-	file_list="${@:$(($argument_count+1))}";
-	number_of_files=$(($# - ($argument_count)));
 }
 
+function MakeFileList(){
+	number_of_files=$(($# - ($argument_count)));
+	local index_number=0;
+        while [[ $# -gt 1 ]]
+        do
+		echo $1
+		if [[ $# -gt $number_of_files ]]; then
+			local nothing=$1;
+		else
+			file_list[$index_number]=$1;
+		fi
+		shift;
+	done
+echo ${file_list[@]}
+}
 
 function GetTotalSize(){
+
 	Debug_Write 3 "Getting total size"
-	Debug_Write 0 "Running Disk Used command";
-	local totalsize=$(du -c $* | tail -n 1 | tr -s \" \" | cut -f1)
+	Debug_Write 0 "Running Disk Used command for $file_list";
+	local totalsize=$(du -c $file_list | tail -n 1 | tr -s \" \" | cut -f1)
 	Debug_Write 0 "totalsize is $totalsize";
 	echo "$totalsize";
 }
@@ -133,7 +147,11 @@ function GetFreeSpace(){
 	echo "$freespace_from_ssh"
 }
 function Combine_Command_String(){
-echo out="$1 $2";
+if [ -z $1 ]; then
+echo "$2";
+else
+echo "$1 $2";
+fi
 }
 function Build_Rsync(){
 	#rsync --rsh='/tmp/pv-wrapper ssh' --inplace -arzvvP --remove-source-files "$1" $username@$server_address:~/;
@@ -169,7 +187,7 @@ function Build_Rsync(){
 		Debug_Write 0 "Setting upload speed to $upload_speed";
 		rsync_command=$(Combine_Command_String "$rsync_command" "--bwlimit=$upload_speed");
 	fi
-	if [ ! -z $key_file ]
+	if [ ! -z $key_file ]; then
 		Debug_Write 0 "Applying KeyFile $key_file";
 		rsync_command=$(Combine_Command_String "$rsync_command" "-e 'ssh -i $key_file'");
 	fi
@@ -206,7 +224,8 @@ done
 
 function MAIN(){
 	Arguments "$@";
-	file_list="${@:$argument_count}";
+	#file_list="${@:$argument_count}";
+	MakeFileList "$@";
 	Debug_Write 1 "Comparing Size of job Vs space on server";
 	local l_totalsize=$(GetTotalSize "$file_list");
 	local l_freespace=$(GetFreeSpace);
@@ -218,17 +237,18 @@ function MAIN(){
 		local freespaceratio=$(( $l_freespace / $l_totalsize ));
 		Debug_Write 100 "Looks like we have ${freespaceratio}x of space needed";
 	fi
-	while ! is_done;
+	while ! $is_done ;
 	do
 		local rsync_command=$(Build_Rsync);
 		Debug_Write 0 "Running Command! $rsync_command"
+		sleep 20
 		eval $(rsync_command);
 		if [[ $? -eq 0 ]];
 		then
 			Debug_Write 10 "Uploading of $file_list seems to be sucessful"
 			is_done=true;
 		else
-			Debug_Write 100 "Upload FAILED, Retrying in 10 seconds;
+			Debug_Write 100 "Upload FAILED, Retrying in 10 seconds";
 		fi
 	done
 }
