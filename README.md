@@ -7,7 +7,6 @@ Used for uploading large files on an unstable  and slow connection. Files will b
 Installation:
 ```bash
 sudo chmod +x KeepRsyncing.sh
-
 sudo ln -s *LOCATION*/KeepRsyncing.sh /usr/local/bin/
 ```
 ----
