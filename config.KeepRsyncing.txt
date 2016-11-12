@@ -1,4 +1,12 @@
 username="root";
 server_address="2.p0p.us";
 upload_location="~/"; # Home location
-upload_speed=100; #KB/s
+upload_speed=100; #KB/s Set 0 to disable speed;
+delete_after_transfer=true;
+debug_level=0; # 0=SEE EVERYTHING Set higher for quieter
+inplace=true;
+stats=true;
+archive=true;
+show_progress=true;
+size_only=false;
+key_file=""; #leave empty to not use it duh;
