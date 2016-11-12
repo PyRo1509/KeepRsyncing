@@ -2,8 +2,6 @@
 OLDIFS=$IFS
 IFS=$'\n';
 debug_level=0;
-username="*USERNAME*";
-server_address="*SERVER*";
 
 function Debug_Write(){
 	#Debug_Write 0 "message"
@@ -16,33 +14,35 @@ function Debug_Write(){
 	fi
 }
 
+config_file_location=$(echo $HOME/KeepRsyncing/config.KeepRsyncing.txt);
+Debug_Write 10 "Loading config file from: $config_file_location";
+source $config_file_location;
+
 function GetTotalSize(){
 	Debug_Write 3 "Getting total size"
-Debug_Write 0 "Running Disk Used command";
-local totalsize=$(du -c $* | tail -n 1 | tr -s \" \" | cut -f1)
-Debug_Write 0 "totalsize is $totalsize";
-echo "$totalsize";
+	Debug_Write 0 "Running Disk Used command";
+	local totalsize=$(du -c $* | tail -n 1 | tr -s \" \" | cut -f1)
+	Debug_Write 0 "totalsize is $totalsize";
+	echo "$totalsize";
 }
 
 function GetFreeSpace(){
-Debug_Write 3 "Getting Free Space";
-local freespace_from_ssh=$(ssh $username@$server_address df -B1 | grep /dev/simfs | head -n 1 | tr -s " " | cut -f4 -d " ");
-Debug_Write 0 "freespace_from_ssh is $freespace_from_ssh";
-echo "$freespace_from_ssh"
+	Debug_Write 3 "Getting Free Space";
+	local freespace_from_ssh=$(ssh $username@$server_address df -B1 | grep /dev/simfs | head -n 1 | tr -s " " | cut -f4 -d " ");
+	Debug_Write 0 "freespace_from_ssh is $freespace_from_ssh";
+	echo "$freespace_from_ssh"
 }
 
 function MAIN(){
-Debug_Write 1 "Comparing Size of job Vs space on server";
-local l_totalsize=$(GetTotalSize "$@");
-local l_freespace=$(GetFreeSpace);
-if [[ $l_totalsize -gt $l_freespace ]];
-then
-Debug_Write 100 "NOT ENOUGH SPACE!!!";
-else
-
-local freespaceratio=$(( $l_freespace / $l_totalsize ));
-
-Debug_Write 100 "Looks like we have $freespaceratio\x of space needed";
+	Debug_Write 1 "Comparing Size of job Vs space on server";
+	local l_totalsize=$(GetTotalSize "$@");
+	local l_freespace=$(GetFreeSpace);
+	if [[ $l_totalsize -gt $l_freespace ]];
+	then
+		Debug_Write 100 "NOT ENOUGH SPACE!!!";
+	else
+		local freespaceratio=$(( $l_freespace / $l_totalsize ));
+		Debug_Write 100 "Looks like we have ${freespaceratio}x of space needed";
 
 fi
 
@@ -54,7 +54,7 @@ do
 	do
 		Debug_Write 1 "$1 is not missing. Starting rsync";
 		#rsync --rsh='/tmp/pv-wrapper ssh' --inplace -arzvvP --remove-source-files "$1" $username@$server_address:~/;
-		rsync -avvrPih --stats --inplace --remove-source-files --bwlimit=100 "$1" $username@$server_address:~/ ;
+		rsync -avvrPih --stats --inplace --remove-source-files --bwlimit=$upload_speed "$1" $username@$server_address:~/ ;
 		sleep 2;
 	done
 

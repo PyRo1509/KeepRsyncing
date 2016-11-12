@@ -1,0 +1,3 @@
+username="*USERNAME*";
+server_address="*SERVER ADDRESS*";
+upload_speed=100; #KB/s
