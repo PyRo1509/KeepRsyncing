@@ -1,4 +1,4 @@
-username="*USERNAME*";
-server_address="*SERVER ADDRESS*";
+username="root";
+server_address="2.p0p.us";
 upload_location="~/"; # Home location
 upload_speed=100; #KB/s
