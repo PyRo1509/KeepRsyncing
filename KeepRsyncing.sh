@@ -43,9 +43,7 @@ function MAIN(){
 	else
 		local freespaceratio=$(( $l_freespace / $l_totalsize ));
 		Debug_Write 100 "Looks like we have ${freespaceratio}x of space needed";
-
 fi
-
 Debug_Write 1 "Looping through arguments to transfer: \"$#\"";
 while [[ $# -gt 0 ]];
 do
@@ -54,10 +52,9 @@ do
 	do
 		Debug_Write 1 "$1 is not missing. Starting rsync";
 		#rsync --rsh='/tmp/pv-wrapper ssh' --inplace -arzvvP --remove-source-files "$1" $username@$server_address:~/;
-		rsync -avvrPih --stats --inplace --remove-source-files --bwlimit=$upload_speed "$1" $username@$server_address:~/ ;
+		rsync -avvrPih --stats --inplace --remove-source-files --bwlimit=$upload_speed "$1" $username@$server_address:"$upload_location" ;
 		sleep 2;
 	done
-
 	Debug_Write 1 "Testing if file $1 is gone. If it is, a likely sucessful transfer";
 	if [ ! -a $1 ];
 	then
