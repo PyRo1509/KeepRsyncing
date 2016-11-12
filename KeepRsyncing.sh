@@ -2,8 +2,8 @@
 OLDIFS=$IFS
 IFS=$'\n';
 debug_level=0;
-username="root";
-server_address="2.p0p.us";
+username="*USERNAME*";
+server_address="*SERVER*";
 
 function Debug_Write(){
 	#Debug_Write 0 "message"
